@@ -1,5 +1,6 @@
 const User = require('../models/users');
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 function isStringInvalid(string) {
   if (string === undefined || string.length === 0) {
@@ -18,9 +19,7 @@ const signup = async (req, res) => {
       isStringInvalid(email) ||
       isStringInvalid(password)
     ) {
-      return res
-        .status(400)
-        .json({ err: "Bad Parameters, Something is missing" });
+      return res.status(400).json({ err: "Bad Parameters, Something is missing" });
     }
 
     const saltrounds = 10;
@@ -36,6 +35,10 @@ const signup = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const generateAccessToken = (id, name) => {
+  return jwt.sign({ userId : id, name: name } ,'secretkey');
+}
 
 const login = async (req, res) => {
   try {
@@ -55,7 +58,7 @@ const login = async (req, res) => {
           throw new Error("Something went wrong");
         }
         if (result === true) {
-          return res.status(200).json({ success: true, message: "User logged in successfully" });
+          return res.status(200).json({success: true, message: "User logged in successfully", token: generateAccessToken(user[0].id, user[0].name)})
         } else {
           return res.status(400).json({ success: false, message: "Password is incorrect" });
         }
@@ -70,7 +73,8 @@ const login = async (req, res) => {
 
 module.exports = {
     signup,
-    login
+    login,
+    generateAccessToken
 }
 
 
