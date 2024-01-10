@@ -6,6 +6,7 @@ const User = require('./models/users');
 const userController = require('./controllers/user');
 
 const userRoutes = require('./routes/user');
+const expenseRoutes = require('./routes/expense');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/user',userRoutes);
+app.use('/expense',expenseRoutes);
 
 
 

@@ -11,7 +11,8 @@ async function login(e){
         console.log(loginDetails);
 
         const response = await axios.post('http://localhost:3000/user/login',loginDetails)
-        alert("User Logged in Successfully");
+            alert("User Logged in Successfully")
+            window.location.href = "../ExpenseTracker/index.html";
 
 
     }catch(err){
