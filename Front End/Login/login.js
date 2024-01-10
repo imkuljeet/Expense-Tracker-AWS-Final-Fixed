@@ -10,6 +10,9 @@ async function login(e){
 
         console.log(loginDetails);
 
+        const response = await axios.post('http://localhost:3000/user/login',loginDetails)
+        alert("User Logged in Successfully");
+
 
     }catch(err){
         console.log(JSON.stringify(err));
