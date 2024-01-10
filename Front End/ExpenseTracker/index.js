@@ -1,36 +1,36 @@
-function addNewExpense(e) {
-    e.preventDefault();
-  
-    const expenseDetails = {
-      expenseamount: e.target.expenseAmount.value,
-      description: e.target.description.value,
-      category: e.target.category.value,
-    };
-  
-    console.log(expenseDetails);
-  
-    axios
-      .post("http://localhost:3000/expense/addexpense", expenseDetails)
-      .then((response) => {
-        addNewExpensetoUI(response.data.expense);
-      })
-      .catch((err) => console.log(err));
+async function addNewExpense(e) {
+  e.preventDefault();
+
+  const expenseDetails = {
+    expenseamount: e.target.expenseAmount.value,
+    description: e.target.description.value,
+    category: e.target.category.value,
+  };
+
+  console.log(expenseDetails);
+
+  try {
+    const response = await axios.post("http://localhost:3000/expense/addexpense", expenseDetails);
+    addNewExpensetoUI(response.data.expense);
+  } catch (err) {
+    console.log(err);
   }
-  
-  window.addEventListener("DOMContentLoaded", () => {
-    axios
-      .get("http://localhost:3000/expense/getexpenses")
-      .then((response) => {
-        response.data.expenses.forEach((expense) => {
-          addNewExpensetoUI(expense);
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  });
-  
-  function addNewExpensetoUI(expense) {
+}
+ 
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/expense/getexpenses");
+    const expenses = response.data.expenses;
+
+    expenses.forEach((expense) => {
+      addNewExpensetoUI(expense);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+ 
+function addNewExpensetoUI(expense) {
     const parentElement = document.getElementById("listOfExpenses");
     const expenseElemId = `expense-${expense.id}`;
     parentElement.innerHTML += `
@@ -40,22 +40,21 @@ function addNewExpense(e) {
                   Delete Expense
               </button>
           </li>`;
+}
+  
+async function deleteExpense(event, expenseId) {
+  console.log("Deleting expense with ID:", expenseId);
+
+  try {
+    await axios.delete(`http://localhost:3000/expense/deleteexpense/${expenseId}`);
+    removeExpensefromUI(expenseId);
+  } catch (err) {
+    console.log(err);
   }
+}
   
-  function deleteExpense(event, expenseId) {
-    console.log("Deleting expense with ID:", expenseId);
-  
-    axios
-      .delete(`http://localhost:3000/expense/deleteexpense/${expenseId}`)
-      .then(() => {
-        removeExpensefromUI(expenseId);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  
-  function removeExpensefromUI(expenseid) {
+function removeExpensefromUI(expenseid) {
     const expenseElemId = `expense-${expenseid}`;
     document.getElementById(expenseElemId).remove();
-  }
+}
+
