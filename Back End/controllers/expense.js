@@ -35,14 +35,17 @@ const deleteexpense = async (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid expense ID" });
       }
   
-      await Expense.destroy({where: { id: expenseid, userId: req.user.id }});
-  
-      return res.status(200).json({ success: true, message: "Deleted Successfully" });
+      const noOfRows = await Expense.destroy({ where: { id: expenseid, userId: req.user.id } });
 
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: "Failed to delete expense" });
-    }
+      if (noOfRows === 0) {
+          return res.status(404).json({ success: false, message: 'Expense doesn\'t belong to the user' });
+      }
+
+      return res.status(200).json({ success: true, message: 'Deleted Successfully' });
+  } catch (err) {
+      console.log(err);
+      return res.status(500).json({ success: false, message: 'Failed' });
+  }
 };
   
 module.exports = {
