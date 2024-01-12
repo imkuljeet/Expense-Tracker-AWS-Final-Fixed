@@ -5,17 +5,17 @@ const e = require('express');
 
 const getUserLeaderBoard = async (req, res) => {
     try{
-       const users = await User.findAll();
-       const expenses = await Expense.findAll();
-       const userAgrregatedExpenses = {};
+        const users = await User.findAll({
+            attributes: ['id','name']
+           });
+           const userAgrregatedExpenses = await Expense.findAll({
+            attributes: ['userId',[sequelize.fn('sum', sequelize.col('expenses.expenseamount')), 'total_cost'] ],
+            group: ['userId']
+           });
 
-       expenses.forEach((expense)=>{
-        if(userAgrregatedExpenses[expense.userId]){
-            userAgrregatedExpenses[expense.userId] = userAgrregatedExpenses[expense.userId]+expense.expenseamount;
-        }else{
-            userAgrregatedExpenses[expense.userId] = expense.expenseamount;
-        }
-       })
+           console.log("user agrre expenses is ---->",userAgrregatedExpenses);
+
+
        var userLeaderboardDetails = [];
        users.forEach((user)=>{
         userLeaderboardDetails.push({ name: user.name, total_cost: userAgrregatedExpenses[user.id] || 0})
@@ -23,7 +23,6 @@ const getUserLeaderBoard = async (req, res) => {
        console.log(userLeaderboardDetails);
       
        userLeaderboardDetails.sort((a, b) => b.total_cost - a.total_cost);   //NOT WORKING
-
 
        res.status(200).json(userLeaderboardDetails);
     
@@ -36,4 +35,6 @@ const getUserLeaderBoard = async (req, res) => {
 module.exports = {
     getUserLeaderBoard
 }
+
+
 
