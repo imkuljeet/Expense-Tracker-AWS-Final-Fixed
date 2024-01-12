@@ -42,8 +42,8 @@ const purchasepremium =async (req, res) => {
             throw new Error(error)
         })
 
-
-
+        
+                
     } catch (err) {
         console.log(err);
         res.status(403).json({ errpr: err, message: 'Sometghing went wrong' })
@@ -54,4 +54,5 @@ const purchasepremium =async (req, res) => {
 module.exports = {
     purchasepremium,
     updateTransactionStatus
-} 
+}
+
