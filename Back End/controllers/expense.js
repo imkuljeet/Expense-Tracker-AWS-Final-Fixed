@@ -1,7 +1,9 @@
 const Expense = require('../models/expenses');
 const User = require('../models/users');
+const sequelize = require('../util/database');
 
 const addexpense = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const { expenseamount, description, category } = req.body;
 
@@ -16,7 +18,7 @@ const addexpense = async (req, res) => {
       description,
       category,
       userId: req.user.id
-  });
+  },{transaction: t});
 
     const totalExpense = Number(req.user.totalExpenses) + Number(expenseamount);
     console.log('total Expense amt is', totalExpense);
@@ -24,15 +26,18 @@ const addexpense = async (req, res) => {
     await User.update({
       totalExpenses: totalExpense
     }, {
-      where: { id: req.user.id }
+      where: { id: req.user.id },
+      transaction: t
     });
+    await t.commit();
     res.status(201).json({ expense, success: true });
  
   } catch (err) {
+    await t.rollback();
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-  
+ 
 const getexpenses = async (req, res) => {
     try {
       const expenses = await Expense.findAll({ where : { userId: req.user.id}});
