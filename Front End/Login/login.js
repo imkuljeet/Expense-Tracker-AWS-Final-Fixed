@@ -23,4 +23,8 @@ async function login(e){
     }
 }
 
+function forgotpassword() {
+    window.location.href = "../ForgotPassword/index.html"
+  }
+
 
