@@ -49,23 +49,41 @@ const getexpenses = async (req, res) => {
 };
   
 const deleteexpense = async (req, res) => {
-    try {
-      const expenseid = req.params.expenseid;
-  
-      if (expenseid == undefined || expenseid.length === 0) {
-        return res.status(400).json({ success: false, message: "Invalid expense ID" });
-      }
-  
-      const noOfRows = await Expense.destroy({ where: { id: expenseid, userId: req.user.id } });
+  const t = await sequelize.transaction();
+  try {
+    const expenseid = req.params.expenseid;
 
-      if (noOfRows === 0) {
-          return res.status(404).json({ success: false, message: 'Expense doesn\'t belong to the user' });
-      }
+    if (expenseid == undefined || expenseid.length === 0) {
+      return res.status(400).json({ success: false, message: "Invalid expense ID" });
+    }
 
-      return res.status(200).json({ success: true, message: 'Deleted Successfully' });
+    const expense = await Expense.findByPk(expenseid);
+
+    if (!expense) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Expense not found' });
+    }
+
+    const updatedUser = await User.update(
+      { totalExpenses: req.user.totalExpenses - expense.expenseamount },
+      { where: { id: req.user.id }, transaction: t }
+    );
+
+    // Check if the update operation affected any rows
+    if (updatedUser[0] === 0) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Expense doesn\'t belong to the user' });
+    }
+
+    await Expense.destroy({ where: { id: expenseid, userId: req.user.id }, transaction: t });
+
+    await t.commit();
+    return res.status(200).json({ success: true, message: "Deleted successfully" });
+
   } catch (err) {
-      console.log(err);
-      return res.status(500).json({ success: false, message: 'Failed' });
+    console.error(err);
+    await t.rollback();
+    return res.status(500).json({ success: false, message: 'Failed' });
   }
 };
   
