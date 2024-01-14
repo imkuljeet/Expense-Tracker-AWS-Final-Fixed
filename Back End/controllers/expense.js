@@ -172,13 +172,36 @@ const downloadItems = async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to fetch downloaded items' });
   }
 }
+
+const addexpensetopagination = async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const itemsPerPage = 3;
+    const offset = (page - 1) * itemsPerPage;
+
+    // Assuming you have a Sequelize query to fetch expenses with pagination
+    const { count, rows: expenses } = await Expense.findAndCountAll({
+      limit: itemsPerPage,
+      offset: offset,
+      order: [['createdAt', 'DESC']], // Adjust the order as needed
+    });
+
+    const totalPages = Math.ceil(count / itemsPerPage);
+
+    res.json({ expenses, totalPages });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
   
 module.exports = {
     addexpense,
     getexpenses,
     deleteexpense,
     downloadExpenses,
-    downloadItems
+    downloadItems,
+    addexpensetopagination
 }
 
 

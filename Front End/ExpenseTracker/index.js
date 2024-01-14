@@ -38,6 +38,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     expenses.forEach((expense) => {
       addNewExpensetoUI(expense);
     });
+    loadExpenses();
   } catch (err) {
     console.log(err);
     showError(err);
@@ -201,3 +202,60 @@ async function showDownloadedItems() {
     showError(err);
   }
 }
+
+let currentPage = 1;
+
+function loadExpenses(direction) {
+  const token = localStorage.getItem('token');
+
+  // Assuming that currentPage and totalPages are global variables or defined in the same scope
+  if (direction === 'prev' && currentPage > 1) {
+    currentPage--;
+  } else if (direction === 'next') {
+    currentPage++;
+  }
+
+  axios.get(`http://localhost:3000/expense/getexpensesz?page=${currentPage}`, {
+      headers: { Authorization: token },
+    })
+    .then(response => {
+      const expenses = response.data.expenses;
+      const totalPages = response.data.totalPages || 1;  // Use a default value of 1 if totalPages is undefined
+
+      // Ensure the currentPage does not exceed the totalPages
+      currentPage = Math.min(currentPage, totalPages);
+
+      displayExpenses(expenses);
+      document.getElementById('currentPage').innerText = currentPage;
+      document.getElementById('totalPages').innerText = totalPages;
+
+      // Disable or hide the 'Next' button when on the last page
+      const nextPageButton = document.getElementById('nextPage');
+      if (currentPage === totalPages) {
+        nextPageButton.disabled = true;
+      } else {
+        nextPageButton.disabled = false;
+      }
+
+      // Disable or hide the 'Previous' button when on the first page
+      const prevPageButton = document.getElementById('prevPage');
+      if (currentPage === 1) {
+        prevPageButton.disabled = true;
+      } else {
+        prevPageButton.disabled = false;
+      }
+    })
+    .catch(err => {
+      showError(err);
+    });
+}
+
+
+function displayExpenses(expenses) {
+  const parentElement = document.getElementById('listOfExpenses');
+  parentElement.innerHTML = ''; // Clear existing content
+  expenses.forEach(expense => {
+    addNewExpensetoUI(expense);
+  });
+}
+

@@ -15,5 +15,7 @@ router.get('/download', userauthentication.authenticate, expenseController.downl
 
 router.get('/downloadeditems', userauthentication.authenticate, expenseController.downloadItems);
 
+router.get('/getexpensesz',userauthentication.authenticate,expenseController.addexpensetopagination);
+
 module.exports = router;
 
