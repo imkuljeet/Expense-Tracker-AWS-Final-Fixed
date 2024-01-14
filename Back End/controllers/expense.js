@@ -1,5 +1,7 @@
 const Expense = require('../models/expenses');
 const User = require('../models/users');
+const DownloadHistory = require('../models/downloadhistory');
+
 const sequelize = require('../util/database');
 const AWS = require('aws-sdk');
 
@@ -119,11 +121,15 @@ function uploadTos3(data, filename){
       })
 
       
-  }
+}
 
 const downloadExpenses = async (req, res) => {
   try {
     // Assuming req.user is the current user object
+    if (req.user.ispremiumuser==false) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Premium feature' });
+    }
+
     const expenses = await req.user.getExpenses();
     console.log(expenses);
 
@@ -135,6 +141,13 @@ const downloadExpenses = async (req, res) => {
     const filename = `Expense${userId}/${new Date()}.txt`;
     const fileURl = await uploadTos3(stringifiedExpenses,filename);
     console.log(fileURl);
+
+    await DownloadHistory.create({
+      userId: req.user.id,
+      fileURL: fileURl,
+      downloadDate: new Date(),
+    });
+
     res.status(200).json({ fileURl, success: true })
   
 
@@ -145,12 +158,27 @@ const downloadExpenses = async (req, res) => {
   }
 };
 
+const downloadItems = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const downloadedItems = await DownloadHistory.findAll({
+      where: { userId },
+      attributes: ['fileURL', 'downloadDate'],
+    });
+
+    return res.status(200).json({ downloadedItems, success: true });
+  } catch (error) {
+    console.error('Error fetching downloaded items:', error);
+    return res.status(500).json({ success: false, error: 'Failed to fetch downloaded items' });
+  }
+}
   
 module.exports = {
     addexpense,
     getexpenses,
     deleteexpense,
-    downloadExpenses
+    downloadExpenses,
+    downloadItems
 }
 
 

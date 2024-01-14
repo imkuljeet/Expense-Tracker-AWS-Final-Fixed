@@ -8,6 +8,7 @@ const User = require('./models/users');
 const Expense = require('./models/expenses');
 const Order = require('./models/orders');
 const Forgotpassword = require('./models/forgotpassword');
+const DownloadHistory = require('./models/downloadhistory');
 
 const userRoutes = require('./routes/user');
 const expenseRoutes = require('./routes/expense');
@@ -38,6 +39,10 @@ Order.belongsTo(User);
 
 User.hasMany(Forgotpassword);
 Forgotpassword.belongsTo(User);
+
+User.hasMany(DownloadHistory);
+DownloadHistory.belongsTo(User);
+
 
 
 sequelize

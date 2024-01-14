@@ -29,6 +29,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     if(ispremiumuser){
       showPremiumuserMessage()
       showLeaderboard()
+      showDownloadedItems();
     }
 
     const response = await axios.get("http://localhost:3000/expense/getexpenses",{ headers: {"Authorization" : token} });
@@ -143,24 +144,60 @@ function showLeaderboard(){
 
 }
 
-function download(){
-  const token = localStorage.getItem('token');
+async function download() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseJwt(token);
+    console.log("Decoded token is", decodedToken);
 
-  axios.get('http://localhost:3000/expense/download', { headers: {"Authorization" : token} })
-  .then((response) => {
-      if(response.status === 200){
-          //the bcakend is essentially sending a download link
-          //  which if we open in browser, the file would download
-          var a = document.createElement("a");
-          a.href = response.data.fileURl;
-          a.download = 'myexpense.csv';
-          a.click();
+    if (decodedToken && decodedToken.ispremiumuser) {
+      const response = await axios.get('http://localhost:3000/expense/download', {
+        headers: { "Authorization": token }
+      });
+
+      if (response.status === 200) {
+        // The backend is essentially sending a download link
+        // which, if we open in the browser, the file would download
+        var a = document.createElement("a");
+        a.href = response.data.fileURl;
+        a.download = 'myexpense.csv';
+        a.click();
       } else {
-          throw new Error(response.data.message)
+        throw new Error(response.data.message);
       }
+    } else {
+      showError("Unauthorized: Premium feature");
+    }
+  } catch (err) {
+    showError(err);
+  }
+}
 
-  })
-  .catch((err) => {
-      showError(err)
-  });
+async function showDownloadedItems() {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get("http://localhost:3000/expense/downloadeditems", { headers: { "Authorization": token } });
+    const downloadedItems = response.data.downloadedItems;
+
+    const downloadedItemsList = document.getElementById("downloadeditems");
+
+    // Clear existing items
+    downloadedItemsList.innerHTML = "";
+
+    downloadedItems.forEach((item) => {
+      const listItem = document.createElement("li");
+
+      // Create a link element
+      const link = document.createElement("a");
+      link.href = item.fileURL;  // Set the link URL
+      link.textContent = `Download File - ${item.downloadDate}`;  // Set the link text
+      link.target = "_blank";  // Open the link in a new tab/window
+
+      listItem.appendChild(link);
+      downloadedItemsList.appendChild(listItem);
+    });
+  } catch (err) {
+    console.log(err);
+    showError(err);
+  }
 }
