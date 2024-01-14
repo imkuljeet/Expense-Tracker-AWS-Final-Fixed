@@ -38,6 +38,9 @@
   <button id="nextPage" onclick="loadExpenses('next')">Next</button>
 </div>
 
+<label for="expensesPerPage">Expenses per Page:</label>
+<input type="number" id="expensesPerPage" name="expensesPerPage" min="5" max="40" />
+<button onclick="setExpensesPerPage()">Set</button>
 
     <ul id="downloadeditems"></ul>
     <ul id="leaderboard"></ul>

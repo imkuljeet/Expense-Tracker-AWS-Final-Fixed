@@ -176,7 +176,9 @@ const downloadItems = async (req, res) => {
 const addexpensetopagination = async (req, res) => {
   try {
     const page = req.query.page || 1;
-    const itemsPerPage = 3;
+    let itemsPerPage = req.query.itemsPerPage || 20; // Default to 20 items per page if not provided
+    itemsPerPage = Math.max(5, Math.min(40, itemsPerPage)); // Ensure the value is between 5 and 40
+
     const offset = (page - 1) * itemsPerPage;
 
     // Assuming you have a Sequelize query to fetch expenses with pagination
@@ -194,6 +196,7 @@ const addexpensetopagination = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
   
 module.exports = {
     addexpense,

@@ -207,6 +207,7 @@ let currentPage = 1;
 
 function loadExpenses(direction) {
   const token = localStorage.getItem('token');
+  const expensesPerPage = localStorage.getItem('expensesPerPage') || 10; // Default to 10 expenses per page if not set
 
   // Assuming that currentPage and totalPages are global variables or defined in the same scope
   if (direction === 'prev' && currentPage > 1) {
@@ -215,12 +216,12 @@ function loadExpenses(direction) {
     currentPage++;
   }
 
-  axios.get(`http://localhost:3000/expense/getexpensesz?page=${currentPage}`, {
-      headers: { Authorization: token },
-    })
-    .then(response => {
-      const expenses = response.data.expenses;
-      const totalPages = response.data.totalPages || 1;  // Use a default value of 1 if totalPages is undefined
+  axios.get(`http://localhost:3000/expense/getexpensesz?page=${currentPage}&itemsPerPage=${expensesPerPage}`, {
+    headers: { Authorization: token },
+  })
+  .then(response => {
+    const expenses = response.data.expenses;
+    const totalPages = response.data.totalPages || 1;
 
       // Ensure the currentPage does not exceed the totalPages
       currentPage = Math.min(currentPage, totalPages);
@@ -250,7 +251,6 @@ function loadExpenses(direction) {
     });
 }
 
-
 function displayExpenses(expenses) {
   const parentElement = document.getElementById('listOfExpenses');
   parentElement.innerHTML = ''; // Clear existing content
@@ -259,3 +259,14 @@ function displayExpenses(expenses) {
   });
 }
 
+function setExpensesPerPage() {
+  const expensesPerPageInput = document.getElementById('expensesPerPage');
+  const expensesPerPage = expensesPerPageInput.value;
+
+  if (expensesPerPage && !isNaN(expensesPerPage) && expensesPerPage >= 5 && expensesPerPage <= 40) {
+    localStorage.setItem('expensesPerPage', expensesPerPage);
+    loadExpenses(); // Reload expenses based on the new preference
+  } else {
+    alert('Please enter a valid number between 5 and 40.');
+  }
+}
