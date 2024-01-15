@@ -183,14 +183,14 @@ const addexpensetopagination = async (req, res) => {
 
     // Assuming you have a Sequelize query to fetch expenses with pagination
     const { count, rows: expenses } = await Expense.findAndCountAll({
+      where: { userId: req.user.id }, // Add the where clause here
       limit: itemsPerPage,
       offset: offset,
       order: [['createdAt', 'DESC']], // Adjust the order as needed
     });
+     const totalPages = Math.ceil(count / itemsPerPage);
 
-    const totalPages = Math.ceil(count / itemsPerPage);
-
-    res.json({ expenses, totalPages });
+      res.json({ expenses, totalPages });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
