@@ -31,7 +31,7 @@ const forgotpassword = async (req, res) => {
             to: email,
             subject: 'DUMMY MAIL - Welcome to NodeJS Brevo Combo',
             text: 'Its a DUMMY MAIL..This is an email using Brevo so that we can send mail easily',
-            html: `<h1>Click on the link below to reset the Password.</h1><a href="http://localhost:3000/password/resetpassword/${id}">Reset password</a>`,
+            html: `<h1>Click on the link below to reset the Password.</h1><a href="${process.env.WEBSITE}/password/resetpassword/${id}">Reset password</a>`,
         };
         
 
