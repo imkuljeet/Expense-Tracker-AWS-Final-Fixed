@@ -31,12 +31,40 @@ app.use(cors());
 
 app.use(express.json());  
 app.use(morgan('combined',{stream: accessLogStream}));
+app.use(express.static('public'));
 
 app.use('/user',userRoutes);
 app.use('/expense',expenseRoutes);
 app.use('/purchase', purchaseRoutes);
 app.use('/premium', premiumFeatureRoutes);
 app.use('/password', resetPasswordRoutes);
+
+app.use('/login', (req, res) => {
+    console.log('Middleware for /home route');
+
+    res.sendFile('login.html',{root:'views'});
+    
+});
+
+app.use('/signup', (req, res) => {
+    console.log('Middleware for /signup route');
+
+    res.sendFile('signup.html', { root: 'views' });
+});
+
+app.use('/forgotpasswordss', (req, res) => {
+    console.log('Middleware for /forgotpassword route');
+
+    res.sendFile('forgotpassword.html', { root: 'views' });
+});
+
+app.use('/expensetracker', (req, res) => {
+    console.log('Middleware for /expensetracker route');
+
+    res.sendFile('expensetracker.html', { root: 'views' });
+});
+
+
 
 app.use(helmet());
 
